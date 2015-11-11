@@ -1,12 +1,26 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Yesod.Csp where
+module Yesod.Csp (
+  cspPolicy
+  , getCspPolicy
+  , DirectiveList
+  , Directive(..)
+  , SourceList
+  , Source(..)
+  ) where
 
 import           Data.Text
-import qualified Data.Text as T
+import qualified Data.Text          as T
+import           Yesod.Core
 
-withSeparator :: [Text] -> Text
-withSeparator = T.intercalate " "
+cspPolicy :: (MonadHandler m) => DirectiveList -> m ()
+cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
+
+getCspPolicy :: DirectiveList -> Text
+getCspPolicy = directiveListToHeader
+
+withSpaces :: [Text] -> Text
+withSpaces = T.intercalate " "
 
 w :: Text -> SourceList -> Text
 w = wrap
@@ -36,7 +50,7 @@ textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 
 textSourceList :: SourceList -> Text
-textSourceList = withSeparator . filtered
+textSourceList = withSpaces . filtered
   where filtered = fmap textSource . filterOut
 
 -- * and none should be alone if present
@@ -77,7 +91,7 @@ textDirective (ObjectSrc x) =  w "object-src" x
 textDirective (MediaSrc x) =  w "media-src" x
 textDirective (FrameSrc x) =  w "frame-src" x
 textDirective (ReportUri t) = mconcat ["report-uri ", t]
-textDirective (Sandbox s) = mconcat ["sandbox", withSeparator . fmap textSandbox $ s]
+textDirective (Sandbox s) = mconcat ["sandbox", withSpaces . fmap textSandbox $ s]
   where textSandbox AllowForms = "allow-forms"
         textSandbox AllowScripts = "allow-scripts"
         textSandbox AllowSameOrigin = "allow-same-origin"

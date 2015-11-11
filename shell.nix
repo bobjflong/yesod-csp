@@ -4,12 +4,13 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, stdenv, text }:
+  f = { mkDerivation, base, hspec, stdenv, text, yesod-core }:
       mkDerivation {
         pname = "yesod-csp";
         version = "0.1.0.0";
         src = ./.;
-        libraryHaskellDepends = [ base text ];
+        libraryHaskellDepends = [ base text yesod-core ];
+        testHaskellDepends = [ base hspec ];
         license = stdenv.lib.licenses.mit;
       };
 
