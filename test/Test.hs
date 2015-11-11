@@ -7,5 +7,5 @@ main :: IO ()
 main = hspec $
   describe "Basics" $
     it "works" $ do
-      let header = getCspPolicy [ScriptSrc [Self], StyleSrc [Https, DomainName "http://foo.com"]]
+      let header = getCspPolicy [ScriptSrc [Self], StyleSrc [Https, Self]]
       header `shouldBe` "foo"

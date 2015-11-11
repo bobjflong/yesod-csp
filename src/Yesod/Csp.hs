@@ -7,10 +7,11 @@ module Yesod.Csp (
   , Directive(..)
   , SourceList
   , Source(..)
+  , example
   ) where
 
 import           Data.Text
-import qualified Data.Text          as T
+import qualified Data.Text  as T
 import           Yesod.Core
 
 cspPolicy :: (MonadHandler m) => DirectiveList -> m ()
