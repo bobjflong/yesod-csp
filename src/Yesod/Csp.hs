@@ -9,8 +9,9 @@ module Yesod.Csp (
   , Source(..)
   ) where
 
-import           Data.Text hiding (filter)
-import qualified Data.Text  as T
+import           Data.List.NonEmpty
+import           Data.Text          hiding (filter, null)
+import qualified Data.Text          as T
 import           Yesod.Core
 
 cspPolicy :: (MonadHandler m) => DirectiveList -> m ()
@@ -19,14 +20,13 @@ cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
-withSpaces :: [Text] -> Text
-withSpaces = T.intercalate " "
+withSpaces :: NonEmpty Text -> Text
+withSpaces = T.intercalate " " . toList
 
 w :: Text -> SourceList -> Text
 w = wrap
 
 wrap :: Text -> SourceList -> Text
-wrap _ [] = ""
 wrap k x = mconcat [k, " ", textSourceList x]
 
 data Source = Wildcard
@@ -38,7 +38,7 @@ data Source = Wildcard
               | UnsafeInline
               | UnsafeEval deriving (Eq)
 
-type SourceList = [Source]
+type SourceList = NonEmpty Source
 
 textSource :: Source -> Text
 textSource Wildcard = "*"
@@ -56,8 +56,8 @@ textSourceList = withSpaces . filtered
 
 -- * and none should be alone if present
 filterOut :: SourceList -> SourceList
-filterOut x | Wildcard `elem` x = [Wildcard]
-filterOut x | None `elem` x = [None]
+filterOut x | Wildcard `elem` x = Wildcard :| []
+filterOut x | None `elem` x = None :| []
             | otherwise = x
 
 data Directive = DefaultSrc SourceList
@@ -69,7 +69,7 @@ data Directive = DefaultSrc SourceList
                  | ObjectSrc SourceList
                  | MediaSrc SourceList
                  | FrameSrc SourceList
-                 | Sandbox [SandboxOptions]
+                 | Sandbox (NonEmpty SandboxOptions)
                  | ReportUri Text
 
 type DirectiveList = [Directive]
@@ -79,7 +79,7 @@ data SandboxOptions = AllowForms
                       | AllowTopNavigation
 
 directiveListToHeader :: DirectiveList -> Text
-directiveListToHeader = T.intercalate "; " . filter ((0 /=) . T.length) . fmap textDirective
+directiveListToHeader = T.intercalate "; " . fmap textDirective
 
 textDirective :: Directive -> Text
 textDirective (DefaultSrc x) = w "default-src" x

@@ -7,7 +7,7 @@ The following code:
 ```haskell
 getHomeR :: Handler Html
 getHomeR = do
-  cspPolicy [ScriptSrc [Self], StyleSrc [Https, Self]]
+  cspPolicy [ScriptSrc (Self :| []), StyleSrc (Https :| [Self])]
   defaultLayout [whamlet|hello|]
 ```
 
