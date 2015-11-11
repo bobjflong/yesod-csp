@@ -12,3 +12,5 @@ getHomeR = do
 ```
 
 will ensure that a `Content-Security-Policy: script-src 'self'; style-src https: 'self'` header is set. In this example we only want to load scripts from our own domain, and we only want styles that come from our domain or over https.
+
+This is a work in progress, not battle-hardened! Use with caution and confirm you're getting the results you need.
