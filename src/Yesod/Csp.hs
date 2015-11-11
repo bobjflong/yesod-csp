@@ -7,7 +7,6 @@ module Yesod.Csp (
   , Directive(..)
   , SourceList
   , Source(..)
-  , example
   ) where
 
 import           Data.Text

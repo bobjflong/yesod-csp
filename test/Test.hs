@@ -8,4 +8,4 @@ main = hspec $
   describe "Basics" $
     it "works" $ do
       let header = getCspPolicy [ScriptSrc [Self], StyleSrc [Https, Self]]
-      header `shouldBe` "foo"
+      header `shouldBe` "script-src 'self'; style-src https: 'self'"
