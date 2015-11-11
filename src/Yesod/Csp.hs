@@ -9,7 +9,7 @@ module Yesod.Csp (
   , Source(..)
   ) where
 
-import           Data.Text
+import           Data.Text hiding (filter)
 import qualified Data.Text  as T
 import           Yesod.Core
 
@@ -26,6 +26,7 @@ w :: Text -> SourceList -> Text
 w = wrap
 
 wrap :: Text -> SourceList -> Text
+wrap _ [] = ""
 wrap k x = mconcat [k, " ", textSourceList x]
 
 data Source = Wildcard
@@ -78,7 +79,7 @@ data SandboxOptions = AllowForms
                       | AllowTopNavigation
 
 directiveListToHeader :: DirectiveList -> Text
-directiveListToHeader = T.intercalate "; " . fmap textDirective
+directiveListToHeader = T.intercalate "; " . filter ((0 /=) . T.length) . fmap textDirective
 
 textDirective :: Directive -> Text
 textDirective (DefaultSrc x) = w "default-src" x
