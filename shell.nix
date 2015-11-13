@@ -4,15 +4,15 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, hspec, semigroups, stdenv, text
-      , yesod-core
+  f = { mkDerivation, base, hspec, semigroups, stdenv, text, yesod
+      , yesod-core, yesod-test
       }:
       mkDerivation {
         pname = "yesod-csp";
         version = "0.1.0.0";
         src = ./.;
         libraryHaskellDepends = [ base semigroups text yesod-core ];
-        testHaskellDepends = [ base hspec ];
+        testHaskellDepends = [ base hspec semigroups yesod yesod-test ];
         license = stdenv.lib.licenses.mit;
       };
 
