@@ -31,7 +31,11 @@ main = hspec $ yesodSpec Test $ do
     yit "works with domains" $ do
       let dom = fromJust $ parseURI "https://foo.com"
           header = getCspPolicy [ScriptSrc (DomainName dom :| [])]
-      assertEqual "Foo.com script-src" header "script-src https://foo.com"
+      assertEqual "foo.com script-src" header "script-src https://foo.com"
+    yit "works with report_uri" $ do
+      let dom = fromJust $ parseURI "https://foo.com"
+          header = getCspPolicy [ReportUri dom]
+      assertEqual "report-uri" header "report-uri https://foo.com"
   ydescribe "Headers" $
     yit "get set" $ do
       get HomeR

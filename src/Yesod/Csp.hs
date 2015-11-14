@@ -71,7 +71,7 @@ data Directive = DefaultSrc SourceList
                  | MediaSrc SourceList
                  | FrameSrc SourceList
                  | Sandbox (NonEmpty SandboxOptions)
-                 | ReportUri Text
+                 | ReportUri URI
 
 type DirectiveList = [Directive]
 data SandboxOptions = AllowForms
@@ -92,7 +92,7 @@ textDirective (FontSrc x) =  w "font-src" x
 textDirective (ObjectSrc x) =  w "object-src" x
 textDirective (MediaSrc x) =  w "media-src" x
 textDirective (FrameSrc x) =  w "frame-src" x
-textDirective (ReportUri t) = mconcat ["report-uri ", t]
+textDirective (ReportUri t) = mconcat ["report-uri ", (pack . show) t]
 textDirective (Sandbox s) = mconcat ["sandbox", withSpaces . fmap textSandbox $ s]
   where textSandbox AllowForms = "allow-forms"
         textSandbox AllowScripts = "allow-scripts"
