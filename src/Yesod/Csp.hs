@@ -12,6 +12,7 @@ module Yesod.Csp (
 import           Data.List.NonEmpty
 import           Data.Text          hiding (filter, null)
 import qualified Data.Text          as T
+import           Network.URI
 import           Yesod.Core
 
 cspPolicy :: (MonadHandler m) => DirectiveList -> m ()
@@ -33,7 +34,7 @@ data Source = Wildcard
               | None
               | Self
               | DataScheme
-              | DomainName Text
+              | DomainName URI
               | Https
               | UnsafeInline
               | UnsafeEval deriving (Eq)
@@ -45,7 +46,7 @@ textSource Wildcard = "*"
 textSource None = "'none'"
 textSource Self = "'self'"
 textSource DataScheme = "data:"
-textSource (DomainName x) = x
+textSource (DomainName x) = (pack . show) x
 textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"

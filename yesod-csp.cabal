@@ -23,6 +23,7 @@ library
                        , text
                        , yesod-core
                        , semigroups
+                       , network-uri
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
@@ -38,4 +39,5 @@ test-suite tests
                        , semigroups
                        , yesod
                        , hspec
+                       , network-uri
   default-language:    Haskell2010
