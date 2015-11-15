@@ -36,6 +36,12 @@ main = hspec $ yesodSpec Test $ do
       let dom = fromJust $ parseURI "https://foo.com"
           header = getCspPolicy [ReportUri dom]
       assertEqual "report-uri" header "report-uri https://foo.com"
+    yit "enforces wildcards" $ do
+      let header = getCspPolicy [ScriptSrc (Wildcard :| [Https])]
+      assertEqual "* should be alone" header "script-src *"
+    yit "enforces nones" $ do
+      let header = getCspPolicy [ScriptSrc (None :| [Https])]
+      assertEqual "none should be alone" header "script-src 'none'"
   ydescribe "Headers" $
     yit "get set" $ do
       get HomeR
