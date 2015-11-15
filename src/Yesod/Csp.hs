@@ -56,7 +56,6 @@ filterOut x | Wildcard `elem` x = Wildcard :| []
 filterOut x | None `elem` x = None :| []
             | otherwise = x
 
-
 -- | Represents a location from which assets may be loaded.
 data Source = Wildcard
               | None
