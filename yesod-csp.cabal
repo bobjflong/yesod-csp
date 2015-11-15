@@ -4,7 +4,7 @@
 name:                yesod-csp
 version:             0.1.0.0
 synopsis:            Add CSP headers to Yesod apps
-description:         Add CSP headers to Yesod apps. This helps reduce exposure to XSS attacks.
+description:         Add CSP headers to Yesod apps. This helps reduce exposure to XSS attacks and bad assets.
 license:             MIT
 license-file:        LICENSE
 author:              Bob Long
