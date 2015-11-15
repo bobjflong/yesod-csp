@@ -18,6 +18,8 @@ mkYesod "Example" [parseRoutes|
   /3 Example3R GET
   /4 Example4R GET
   /5 Example5R GET
+  /6 Example6R GET
+  /7 Example7R GET POST
 |]
 
 instance Yesod Example
@@ -67,6 +69,31 @@ getExample5R = do
     [whamlet|
       <img src="http://httpbin.org/image">
     |]
+
+-- | Blocks forms from being submitted
+getExample6R :: Handler Html
+getExample6R = do
+  cspPolicy [Sandbox []]
+  defaultLayout $
+    [whamlet|
+      <form method="post">
+        <input type="submit">
+    |]
+
+getExample7R :: Handler Html
+getExample7R = do
+  cspPolicy [Sandbox [AllowForms]]
+  defaultLayout $
+    [whamlet|
+      <form method="post">
+        <input type="submit">
+    |]
+
+postExample7R :: Handler Html
+postExample7R = do
+  cspPolicy [Sandbox [AllowForms]]
+  defaultLayout $
+    [whamlet|yayyy|]
 
 -- | Run a webserver to serve these examples at /1, /2, etc.
 runExamples :: IO ()

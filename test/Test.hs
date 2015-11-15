@@ -27,7 +27,7 @@ main = hspec $ yesodSpec Test $ do
   ydescribe "Generation" $ do
     yit "works" $ do
       let header = getCspPolicy [ScriptSrc (Self :| []), StyleSrc (Https :| [Self])]
-      assertEqual "Simple header" header "script-src 'self'; style-src https: 'self'"
+      assertEqual "simple header" header "script-src 'self'; style-src https: 'self'"
     yit "works with domains" $ do
       let dom = fromJust $ parseURI "https://foo.com"
           header = getCspPolicy [ScriptSrc (Host dom :| [])]
@@ -40,3 +40,10 @@ main = hspec $ yesodSpec Test $ do
     yit "get set" $ do
       get HomeR
       assertHeader "Content-Security-Policy" "script-src 'self'; style-src https: 'self'"
+  ydescribe "Sandboxes" $ do
+    yit "works when empty" $ do
+      let header = getCspPolicy [Sandbox []]
+      assertEqual "empty sandbox" header "sandbox"
+    yit "works when not empty" $ do
+      let header = getCspPolicy [Sandbox [AllowForms, AllowScripts]]
+      assertEqual "empty sandbox" header "sandbox allow-forms allow-scripts"

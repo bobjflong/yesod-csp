@@ -8,6 +8,7 @@ module Yesod.Csp (
   , Directive(..)
   , SourceList
   , Source(..)
+  , SandboxOptions(..)
   ) where
 
 import           Data.List.NonEmpty
@@ -16,7 +17,7 @@ import qualified Data.Text          as T
 import           Network.URI
 import           Yesod.Core
 
--- | Adds a Content-Security-Policy header to your response.
+-- | Adds a "Content-Security-Policy" header to your response.
 --
 -- > getExample1R :: Handler Html
 -- > getExample1R = do
@@ -33,8 +34,8 @@ cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
-withSpaces :: NonEmpty Text -> Text
-withSpaces = T.intercalate " " . toList
+withSpaces :: [Text] -> Text
+withSpaces = T.intercalate " "
 
 w :: Text -> SourceList -> Text
 w = wrap
@@ -66,7 +67,7 @@ textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 
 textSourceList :: SourceList -> Text
-textSourceList = withSpaces . filtered
+textSourceList = withSpaces . toList . filtered
   where filtered = fmap textSource . filterOut
 
 -- * and none should be alone if present
@@ -78,7 +79,7 @@ filterOut x | None `elem` x = None :| []
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]
 
--- | A restriction on how that asset can be loaded.
+-- | A restriction on how assets can be loaded.
 -- For example @ImgSrc@ concerns where images may be loaded from.
 data Directive = DefaultSrc SourceList
                  | ScriptSrc SourceList
@@ -89,9 +90,11 @@ data Directive = DefaultSrc SourceList
                  | ObjectSrc SourceList
                  | MediaSrc SourceList
                  | FrameSrc SourceList
-                 | Sandbox (NonEmpty SandboxOptions)
+                 -- | Applies a sandbox to the result. <http://content-security-policy.com/ See here> for more info.
+                 | Sandbox [SandboxOptions]
                  | ReportUri URI
 
+-- | Configuration options for the sandbox.
 data SandboxOptions = AllowForms
                       | AllowScripts
                       | AllowSameOrigin
@@ -111,7 +114,8 @@ textDirective (ObjectSrc x) =  w "object-src" x
 textDirective (MediaSrc x) =  w "media-src" x
 textDirective (FrameSrc x) =  w "frame-src" x
 textDirective (ReportUri t) = mconcat ["report-uri ", (pack . show) t]
-textDirective (Sandbox s) = mconcat ["sandbox", withSpaces . fmap textSandbox $ s]
+textDirective (Sandbox []) = "sandbox"
+textDirective (Sandbox s) = mconcat ["sandbox ", withSpaces . fmap textSandbox $ s]
   where textSandbox AllowForms = "allow-forms"
         textSandbox AllowScripts = "allow-scripts"
         textSandbox AllowSameOrigin = "allow-same-origin"
