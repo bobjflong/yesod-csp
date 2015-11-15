@@ -3,27 +3,30 @@
 
 name:                yesod-csp
 version:             0.1.0.0
--- synopsis:            
--- description:         
+synopsis:            Add CSP headers to Yesod apps
+description:         Add CSP headers to Yesod apps. This helps reduce exposure to XSS attacks.
 license:             MIT
 license-file:        LICENSE
 author:              Bob Long
 maintainer:          robertjflong@gmail.com
--- copyright:           
 category:            Web
 build-type:          Simple
--- extra-source-files:  
 cabal-version:       >=1.10
+
+source-repository head
+  type: git
+  location: https://github.com/bobjflong/yesod-csp.git
 
 library
   exposed-modules:     Yesod.Csp
-  -- other-modules:       
+                       , Yesod.Csp.Example
   -- other-extensions:    
   build-depends:       base < 5
                        , text
                        , yesod-core
                        , semigroups
                        , network-uri
+                       , yesod
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall

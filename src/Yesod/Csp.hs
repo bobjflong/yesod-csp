@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+-- | Add <http://content-security-policy.com/ CSP> headers to Yesod apps.
+-- This helps reduce the risk of exposure to XSS and bad assets.
 module Yesod.Csp (
   cspPolicy
   , getCspPolicy
@@ -15,9 +16,20 @@ import qualified Data.Text          as T
 import           Network.URI
 import           Yesod.Core
 
+-- | Adds a Content-Security-Policy header to your response.
+--
+-- > getExample1R :: Handler Html
+-- > getExample1R = do
+-- >   -- only allow scripts from my website
+-- >   cspPolicy [ScriptSrc (Self :| [])]
+-- >   defaultLayout $ do
+-- >     addScriptRemote "http://httpbin.org/i_am_external"
+-- >     [whamlet|hello|]
+--
 cspPolicy :: (MonadHandler m) => DirectiveList -> m ()
 cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 
+-- | Returns a generated Content-Security-Policy header.
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
@@ -30,15 +42,17 @@ w = wrap
 wrap :: Text -> SourceList -> Text
 wrap k x = mconcat [k, " ", textSourceList x]
 
+-- | Represents a location from which assets may be loaded.
 data Source = Wildcard
               | None
               | Self
               | DataScheme
-              | DomainName URI
+              | Host URI
               | Https
               | UnsafeInline
               | UnsafeEval deriving (Eq)
 
+-- | A list of allowed sources for a directive.
 type SourceList = NonEmpty Source
 
 textSource :: Source -> Text
@@ -46,7 +60,7 @@ textSource Wildcard = "*"
 textSource None = "'none'"
 textSource Self = "'self'"
 textSource DataScheme = "data:"
-textSource (DomainName x) = (pack . show) x
+textSource (Host x) = (pack . show) x
 textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
@@ -61,6 +75,11 @@ filterOut x | Wildcard `elem` x = Wildcard :| []
 filterOut x | None `elem` x = None :| []
             | otherwise = x
 
+-- | A list of restrictions to apply.
+type DirectiveList = [Directive]
+
+-- | A restriction on how that asset can be loaded.
+-- For example @ImgSrc@ concerns where images may be loaded from.
 data Directive = DefaultSrc SourceList
                  | ScriptSrc SourceList
                  | StyleSrc SourceList
@@ -73,7 +92,6 @@ data Directive = DefaultSrc SourceList
                  | Sandbox (NonEmpty SandboxOptions)
                  | ReportUri URI
 
-type DirectiveList = [Directive]
 data SandboxOptions = AllowForms
                       | AllowScripts
                       | AllowSameOrigin
