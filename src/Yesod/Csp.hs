@@ -34,6 +34,9 @@ cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
+directiveListToHeader :: DirectiveList -> Text
+directiveListToHeader = T.intercalate "; " . fmap textDirective
+
 withSpaces :: [Text] -> Text
 withSpaces = T.intercalate " "
 
@@ -42,6 +45,17 @@ w = wrap
 
 wrap :: Text -> SourceList -> Text
 wrap k x = mconcat [k, " ", textSourceList x]
+
+textSourceList :: SourceList -> Text
+textSourceList = withSpaces . toList . filtered
+  where filtered = fmap textSource . filterOut
+
+-- * and none should be alone if present
+filterOut :: SourceList -> SourceList
+filterOut x | Wildcard `elem` x = Wildcard :| []
+filterOut x | None `elem` x = None :| []
+            | otherwise = x
+
 
 -- | Represents a location from which assets may be loaded.
 data Source = Wildcard
@@ -66,16 +80,6 @@ textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 
-textSourceList :: SourceList -> Text
-textSourceList = withSpaces . toList . filtered
-  where filtered = fmap textSource . filterOut
-
--- * and none should be alone if present
-filterOut :: SourceList -> SourceList
-filterOut x | Wildcard `elem` x = Wildcard :| []
-filterOut x | None `elem` x = None :| []
-            | otherwise = x
-
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]
 
@@ -99,9 +103,6 @@ data SandboxOptions = AllowForms
                       | AllowScripts
                       | AllowSameOrigin
                       | AllowTopNavigation
-
-directiveListToHeader :: DirectiveList -> Text
-directiveListToHeader = T.intercalate "; " . fmap textDirective
 
 textDirective :: Directive -> Text
 textDirective (DefaultSrc x) = w "default-src" x
