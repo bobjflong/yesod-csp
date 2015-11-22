@@ -46,7 +46,7 @@ source = wildcard
         host = do
           u <- takeTill (\x -> x == ';' || x == ' ')
           case escapeAndParseURI u of
-            Nothing -> fail "Not a URI" -- n.b. compile time error
+            Nothing -> fail "Not a URI"
             Just uri -> return $ Host uri
         https = do
           _ <- string "https:"
