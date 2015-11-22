@@ -46,7 +46,7 @@ source = wildcard
         host = do
           u <- takeTill (\x -> x == ';' || x == ' ')
           case escapeAndParseURI u of
-            Nothing -> fail "Not a URI"
+            Nothing -> fail "host"
             Just uri -> return $ Host uri
         https = do
           _ <- string "https:"
@@ -55,7 +55,7 @@ source = wildcard
             (Just ' ') -> return Https
             (Just ';') -> return Https
             Nothing -> return Https
-            _ -> fail "Not a https marker"
+            _ -> fail "https"
         unsafeInline = string "unsafe-inline" *> pure UnsafeInline
         unsafeEval = string "unsafe-eval" *> pure UnsafeEval
 
@@ -94,7 +94,7 @@ reportUri = do
   _ <- string " "
   u <- takeTill (\x -> x == ';' || x == ' ')
   case escapeAndParseURI u of
-    Nothing -> fail "Not a Report URI" -- n.b. compile time error
+    Nothing -> fail "reportUri" -- n.b. compile time error
     Just uri -> return $ ReportUri uri
 
 sandbox :: Parser Directive
