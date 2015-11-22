@@ -10,7 +10,9 @@ import           Network.URI
 import           Test.Hspec
 import           Yesod              hiding (get)
 import           Yesod.Csp
+import           Yesod.Csp.TH
 import           Yesod.Test
+import Data.Attoparsec.Text
 
 data Test = Test
 mkYesod "Test" [parseRoutes| / HomeR GET |]
@@ -29,9 +31,9 @@ main = hspec $ yesodSpec Test $ do
       let header = getCspPolicy [ScriptSrc (Self :| []), StyleSrc (Https :| [Self])]
       assertEqual "simple header" header "script-src 'self'; style-src https: 'self'"
     yit "works with domains" $ do
-      let dom = fromJust $ parseURI "https://foo.com"
+      let dom = fromJust $ escapeAndParseURI "https://foo.com;"
           header = getCspPolicy [ScriptSrc (Host dom :| [])]
-      assertEqual "foo.com script-src" header "script-src https://foo.com"
+      assertEqual "foo.com script-src" header "script-src https://foo.com%3B"
     yit "works with report_uri" $ do
       let dom = fromJust $ parseURI "https://foo.com"
           header = getCspPolicy [ReportUri dom]
@@ -53,3 +55,13 @@ main = hspec $ yesodSpec Test $ do
     yit "works when not empty" $ do
       let header = getCspPolicy [Sandbox [AllowForms, AllowScripts]]
       assertEqual "empty sandbox" header "sandbox allow-forms allow-scripts"
+  ydescribe "Parsing" $
+    yit "works" $ do
+      assertEqual "*" (parseOnly source "*") (Right Wildcard)
+      assertEqual "none" (parseOnly source "'none'") (Right None)
+      assertEqual "self" (parseOnly source "'self'") (Right Self)
+      assertEqual "data:" (parseOnly source "data:") (Right DataScheme)
+      assertEqual "https://foo.com" (parseOnly source "https://foo.com") (Right $ Host (fromJust (escapeAndParseURI "https://foo.com")))
+      assertEqual "https:" (parseOnly source "https:") (Right Https)
+      assertEqual "unsafe-inline" (parseOnly source "unsafe-inline") (Right UnsafeInline)
+      assertEqual "unsafe-eval" (parseOnly source "unsafe-eval") (Right UnsafeEval)

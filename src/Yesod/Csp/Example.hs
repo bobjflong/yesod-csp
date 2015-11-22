@@ -7,7 +7,6 @@ module Yesod.Csp.Example where
 
 import           Data.List.NonEmpty
 import           Data.Maybe
-import           Network.URI
 import           Yesod              hiding (get)
 import           Yesod.Csp
 
@@ -43,7 +42,7 @@ getExample2R = do
 -- | Allows images from a certain uri.
 getExample3R :: Handler Html
 getExample3R = do
-  let dom = fromJust (parseURI "http://httpbin.org")
+  let dom = fromJust (escapeAndParseURI "http://httpbin.org")
   cspPolicy [ImgSrc (Host dom :| [])]
   defaultLayout $
     [whamlet|

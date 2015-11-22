@@ -4,6 +4,8 @@
 module Yesod.Csp (
   cspPolicy
   , getCspPolicy
+  , EscapedURI
+  , escapeAndParseURI
   , DirectiveList
   , Directive(..)
   , SourceList
@@ -34,6 +36,19 @@ cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
+data EscapedURI = EscapedURI URI deriving (Eq)
+
+instance Show EscapedURI where
+  show (EscapedURI x) = show x
+
+-- | Escapes ';' '\'' and ' ', and parses to URI
+escapeAndParseURI :: Text -> Maybe EscapedURI
+escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString f . unpack
+  where f :: Char -> Bool
+        f = not . flip elem toEscape
+        toEscape :: String
+        toEscape = ";' "
+
 directiveListToHeader :: DirectiveList -> Text
 directiveListToHeader = S.intercalate "; " . fmap textDirective
 
@@ -58,10 +73,10 @@ data Source = Wildcard
               | None
               | Self
               | DataScheme
-              | Host URI
+              | Host EscapedURI
               | Https
               | UnsafeInline
-              | UnsafeEval deriving (Eq)
+              | UnsafeEval deriving (Eq, Show)
 
 -- | A list of allowed sources for a directive.
 type SourceList = NonEmpty Source
