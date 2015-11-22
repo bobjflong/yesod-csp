@@ -22,7 +22,7 @@ csp = QuasiQuoter {
       quoteExp = \str -> do
         let c = parseOnly directive (T.pack str)
         case c of
-          Left err -> error $ "csp parsing error: " ++ err
+          Left err -> error $ "csp parsing error: " ++ err -- compile time error
           Right x -> dataToExpQ (const Nothing) x
     , quotePat  = undefined
     , quoteType = undefined

@@ -30,9 +30,9 @@ main = hspec $ yesodSpec Test $ do
       let header = getCspPolicy [ScriptSrc (Self :| []), StyleSrc (Https :| [Self])]
       assertEqual "simple header" header "script-src 'self'; style-src https: 'self'"
     yit "works with domains" $ do
-      let dom = fromJust $ escapeAndParseURI "https://foo.com;"
+      let dom = fromJust $ escapeAndParseURI "https://foo.com/bar *"
           header = getCspPolicy [ScriptSrc (Host dom :| [])]
-      assertEqual "foo.com script-src" header "script-src https://foo.com%3B"
+      assertEqual "foo.com script-src" header "script-src https://foo.com/bar%20%2A"
     yit "works with report_uri" $ do
       let dom = fromJust $ escapeAndParseURI "https://foo.com"
           header = getCspPolicy [ReportUri dom]
