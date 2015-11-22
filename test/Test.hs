@@ -4,15 +4,14 @@
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE TypeFamilies          #-}
 
+import           Data.Attoparsec.Text
 import           Data.List.NonEmpty
 import           Data.Maybe
-import           Network.URI
 import           Test.Hspec
-import           Yesod              hiding (get)
+import           Yesod                hiding (get)
 import           Yesod.Csp
 import           Yesod.Csp.TH
 import           Yesod.Test
-import Data.Attoparsec.Text
 
 data Test = Test
 mkYesod "Test" [parseRoutes| / HomeR GET |]
@@ -35,7 +34,7 @@ main = hspec $ yesodSpec Test $ do
           header = getCspPolicy [ScriptSrc (Host dom :| [])]
       assertEqual "foo.com script-src" header "script-src https://foo.com%3B"
     yit "works with report_uri" $ do
-      let dom = fromJust $ parseURI "https://foo.com"
+      let dom = fromJust $ escapeAndParseURI "https://foo.com"
           header = getCspPolicy [ReportUri dom]
       assertEqual "report-uri" header "report-uri https://foo.com"
     yit "enforces wildcards" $ do
@@ -55,7 +54,7 @@ main = hspec $ yesodSpec Test $ do
     yit "works when not empty" $ do
       let header = getCspPolicy [Sandbox [AllowForms, AllowScripts]]
       assertEqual "empty sandbox" header "sandbox allow-forms allow-scripts"
-  ydescribe "Parsing" $
+  ydescribe "Parsing" $ do
     yit "works" $ do
       assertEqual "*" (parseOnly source "*") (Right Wildcard)
       assertEqual "none" (parseOnly source "'none'") (Right None)
@@ -65,3 +64,12 @@ main = hspec $ yesodSpec Test $ do
       assertEqual "https:" (parseOnly source "https:") (Right Https)
       assertEqual "unsafe-inline" (parseOnly source "unsafe-inline") (Right UnsafeInline)
       assertEqual "unsafe-eval" (parseOnly source "unsafe-eval") (Right UnsafeEval)
+      assertEqual "default-src self data:" (parseOnly withSourceList "default-src 'self' data:") (Right $ DefaultSrc (Self :| [DataScheme]))
+      assertEqual "report-uri http://hello.com" (parseOnly reportUri "report-uri http://hello.com") (Right $ ReportUri (fromJust (escapeAndParseURI "http://hello.com")))
+      assertEqual "sandbox allow-forms allow-scripts" (parseOnly sandbox "sandbox allow-forms allow-scripts") (Right $ Sandbox [AllowForms, AllowScripts])
+    yit "works with lists" $ do
+      let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
+      assertEqual "scripts and images" (parseOnly directive "img-src 'self' https:; script-src https://foo.com") (Right result)
+    yit "works with th" $ do
+      let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
+      assertEqual "with th" [csp|img-src 'self' https:; script-src https://foo.com|] result

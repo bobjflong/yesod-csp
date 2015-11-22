@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 -- | Add <http://content-security-policy.com/ CSP> headers to Yesod apps.
 -- This helps reduce the risk of exposure to XSS and bad assets.
 module Yesod.Csp (
@@ -13,9 +14,11 @@ module Yesod.Csp (
   , SandboxOptions(..)
   ) where
 
+import           Data.Data          (Data)
 import           Data.List.NonEmpty
 import qualified Data.Sequences     as S
 import           Data.Text
+import           Data.Typeable      (Typeable)
 import           Network.URI
 import           Yesod.Core
 
@@ -36,7 +39,7 @@ cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
-data EscapedURI = EscapedURI URI deriving (Eq)
+data EscapedURI = EscapedURI URI deriving (Eq, Data, Typeable)
 
 instance Show EscapedURI where
   show (EscapedURI x) = show x
@@ -76,7 +79,7 @@ data Source = Wildcard
               | Host EscapedURI
               | Https
               | UnsafeInline
-              | UnsafeEval deriving (Eq, Show)
+              | UnsafeEval deriving (Eq, Show, Data, Typeable)
 
 -- | A list of allowed sources for a directive.
 type SourceList = NonEmpty Source
@@ -107,13 +110,13 @@ data Directive = DefaultSrc SourceList
                  | FrameSrc SourceList
                  -- | Applies a sandbox to the result. <http://content-security-policy.com/ See here> for more info.
                  | Sandbox [SandboxOptions]
-                 | ReportUri URI
+                 | ReportUri EscapedURI deriving (Eq, Show, Data, Typeable)
 
 -- | Configuration options for the sandbox.
 data SandboxOptions = AllowForms
                       | AllowScripts
                       | AllowSameOrigin
-                      | AllowTopNavigation
+                      | AllowTopNavigation deriving (Eq, Show, Data, Typeable)
 
 textDirective :: Directive -> Text
 textDirective (DefaultSrc x) = w "default-src" x
