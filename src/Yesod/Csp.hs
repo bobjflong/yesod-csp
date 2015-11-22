@@ -47,7 +47,7 @@ escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString f . unpack
   where f :: Char -> Bool
         f = not . flip elem toEscape
         toEscape :: String
-        toEscape = ";' "
+        toEscape = ";'* "
 
 directiveListToHeader :: DirectiveList -> Text
 directiveListToHeader = S.intercalate "; " . fmap textDirective
