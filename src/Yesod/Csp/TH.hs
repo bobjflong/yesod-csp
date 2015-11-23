@@ -44,7 +44,7 @@ source = wildcard
         dataScheme = string "data:" *> pure DataScheme
         host :: Parser Source
         host = do
-          u <- takeTill (\x -> x == ';' || x == ' ')
+          u <- takeTill separated
           case escapeAndParseURI u of
             Nothing -> fail "host"
             Just uri -> return $ Host uri
@@ -58,6 +58,9 @@ source = wildcard
             _ -> fail "https"
         unsafeInline = string "unsafe-inline" *> pure UnsafeInline
         unsafeEval = string "unsafe-eval" *> pure UnsafeEval
+
+separated :: Char -> Bool
+separated x = x == ';' || x == ' '
 
 -- Safe to head and tail these sources as they come from the `sepBy1` combinator
 mkWithSource :: (NonEmpty Source -> Directive) -> [Source] -> Parser Directive
@@ -92,7 +95,7 @@ reportUri :: Parser Directive
 reportUri = do
   _ <- string "report-uri"
   _ <- string " "
-  u <- takeTill (\x -> x == ';' || x == ' ')
+  u <- takeTill separated
   case escapeAndParseURI u of
     Nothing -> fail "reportUri" -- n.b. compile time error
     Just uri -> return $ ReportUri uri
