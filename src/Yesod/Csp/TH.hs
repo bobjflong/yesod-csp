@@ -106,9 +106,9 @@ sandbox = do
 
 sandboxOptions :: Parser SandboxOptions
 sandboxOptions = allowForms
-               <|> allowScripts
-               <|> allowSameOrigin
-               <|> allowTopNavigation
+                 <|> allowScripts
+                 <|> allowSameOrigin
+                 <|> allowTopNavigation
   where allowForms = string "allow-forms" *> pure AllowForms
         allowScripts = string "allow-scripts" *> pure AllowScripts
         allowSameOrigin = string "allow-same-origin" *> pure AllowSameOrigin
