@@ -59,7 +59,7 @@ source = wildcard
         unsafeInline = string "unsafe-inline" *> pure UnsafeInline
         unsafeEval = string "unsafe-eval" *> pure UnsafeEval
 
--- Safe to head and tail these sources as they come from the `some` combinator
+-- Safe to head and tail these sources as they come from the `sepBy1` combinator
 mkWithSource :: (NonEmpty Source -> Directive) -> [Source] -> Parser Directive
 mkWithSource f x = pure $ f (head x :| tail x)
 
