@@ -8,7 +8,6 @@ module Yesod.Csp.TH (
     , sandboxOptions
     , directive
     , csp
-    , host'
   ) where
 
 import           Control.Applicative
@@ -32,11 +31,8 @@ csp = QuasiQuoter {
     , quoteDec  = undefined
     }
 
-host' :: EscapedURI -> Source
-host' = Host
-
 antiCsp :: Source -> Maybe (TH.Q TH.Exp)
-antiCsp (MetaSource x) = Just . return $ TH.AppE (TH.VarE (TH.mkName "host'")) (TH.VarE (TH.mkName (T.unpack x)))
+antiCsp (MetaSource x) = Just . return $ TH.AppE (TH.ConE (TH.mkName "Host")) (TH.VarE (TH.mkName (T.unpack x)))
 antiCsp _ = Nothing
 
 metaSource :: Parser Source
