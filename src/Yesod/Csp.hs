@@ -39,10 +39,10 @@ cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
 
-data EscapedURI = EscapedURI URI deriving (Eq, Data, Typeable)
+newtype EscapedURI = EscapedURI { uri :: URI } deriving (Eq, Data, Typeable)
 
 instance Show EscapedURI where
-  show (EscapedURI x) = show x
+  show x = show (uri x)
 
 -- | Escapes ';' '\'' and ' ', and parses to URI
 escapeAndParseURI :: Text -> Maybe EscapedURI
