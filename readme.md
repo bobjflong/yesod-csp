@@ -17,11 +17,11 @@ will ensure that a `Content-Security-Policy: script-src 'self'; style-src https:
 
 This is a work in progress, not battle-hardened! Use with caution and confirm you're getting the results you need.
 
-### Examples
+#### Examples
 
 [This module](https://github.com/bobjflong/yesod-csp/blob/master/src/Yesod/Csp/Example.hs) contains a host of runnable example Yesod handlers which set various CSP headers.
 
-### Template Haskell support
+#### Template Haskell support
 
 I'm working on Template Haskell support so you don't need to write the ADTs yourself explicitly. You can get the same compile-time checking with the familar CSP DSL:
 
