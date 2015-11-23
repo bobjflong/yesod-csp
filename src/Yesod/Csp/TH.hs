@@ -67,7 +67,16 @@ mkWithSource :: (NonEmpty Source -> Directive) -> [Source] -> Parser Directive
 mkWithSource f x = pure $ f (head x :| tail x)
 
 withSourceList :: Parser Directive
-withSourceList = types
+withSourceList = defaultSrc
+                 <|> scriptSrc
+                 <|> scriptSrc
+                 <|> styleSrc
+                 <|> imgSrc
+                 <|> connectSrc
+                 <|> fontSrc
+                 <|> objectSrc
+                 <|> mediaSrc
+                 <|> frameSrc
   where defaultSrc = d "default-src" DefaultSrc
         scriptSrc = d "script-src" ScriptSrc
         styleSrc = d "style-src" StyleSrc
@@ -80,16 +89,6 @@ withSourceList = types
         d x y = string x >> s >> slist >>= mkWithSource y
         slist = sepBy1 source (char ' ')
         s = string " "
-        types = defaultSrc
-                <|> scriptSrc
-                <|> scriptSrc
-                <|> styleSrc
-                <|> imgSrc
-                <|> connectSrc
-                <|> fontSrc
-                <|> objectSrc
-                <|> mediaSrc
-                <|> frameSrc
 
 reportUri :: Parser Directive
 reportUri = do
