@@ -31,3 +31,13 @@ getHomeR = do
   cspPolicy [csp|img-src 'self' https:; script-src https://foo.com|]
   ...
 ```
+
+You can add in your dynamic urls in scope:
+
+```
+getHomeR :: Handler Html
+getHomeR = do
+  let url = fromJust (escapeAndParseURI ...)
+  cspPolicy [csp|img-src 'self' $url|]
+  ...
+```
