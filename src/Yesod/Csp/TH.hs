@@ -8,12 +8,15 @@ module Yesod.Csp.TH (
     , sandboxOptions
     , directive
     , csp
+    , host'
   ) where
 
 import           Control.Applicative
 import           Data.Attoparsec.Text
+import           Data.Generics
 import           Data.List.NonEmpty        (NonEmpty (..))
 import qualified Data.Text                 as T
+import qualified Language.Haskell.TH       as TH
 import           Language.Haskell.TH.Quote
 import           Yesod.Csp
 
@@ -23,11 +26,24 @@ csp = QuasiQuoter {
         let c = parseOnly directive (T.pack str)
         case c of
           Left err -> error $ "csp parsing error: " ++ err -- compile time error
-          Right x -> dataToExpQ (const Nothing) x
+          Right x -> dataToExpQ (const Nothing `extQ` antiCsp) x
     , quotePat  = undefined
     , quoteType = undefined
     , quoteDec  = undefined
     }
+
+host' :: EscapedURI -> Source
+host' = Host
+
+antiCsp :: Source -> Maybe (TH.Q TH.Exp)
+antiCsp (MetaSource x) = Just . return $ TH.AppE (TH.VarE (TH.mkName "host'")) (TH.VarE (TH.mkName (T.unpack x)))
+antiCsp _ = Nothing
+
+metaSource :: Parser Source
+metaSource = do
+  _ <- char '$'
+  x <- many (digit <|> letter)
+  return $ MetaSource (T.pack x)
 
 source :: Parser Source
 source = wildcard
@@ -38,6 +54,7 @@ source = wildcard
          <|> host
          <|> unsafeInline
          <|> unsafeEval
+         <|> metaSource
   where wildcard = string "*" *> pure Wildcard
         none = string "'none'" *> pure None
         self = string "'self'" *> pure Self

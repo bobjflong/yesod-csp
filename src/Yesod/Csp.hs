@@ -79,7 +79,8 @@ data Source = Wildcard
               | Host EscapedURI
               | Https
               | UnsafeInline
-              | UnsafeEval deriving (Eq, Show, Data, Typeable)
+              | UnsafeEval
+              | MetaSource Text deriving (Eq, Show, Data, Typeable)
 
 -- | A list of allowed sources for a directive.
 type SourceList = NonEmpty Source
@@ -93,6 +94,7 @@ textSource (Host x) = (pack . show) x
 textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
+textSource (MetaSource _) = ""
 
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]

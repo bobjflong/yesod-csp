@@ -75,3 +75,5 @@ main = hspec $ yesodSpec Test $ do
     yit "works with th" $ do
       let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
       assertEqual "with th" [csp|img-src 'self' https:; script-src https://foo.com|] result
+      let u = fromJust $ escapeAndParseURI "https://foo.com"
+      assertEqual "with antiquoting" [csp|img-src 'self' https:; script-src $u|] result
