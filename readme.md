@@ -34,7 +34,7 @@ getHomeR = do
 
 You can add in your dynamic urls in scope:
 
-```
+```haskell
 getHomeR :: Handler Html
 getHomeR = do
   let url = fromJust (escapeAndParseURI ...)
