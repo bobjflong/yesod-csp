@@ -1,5 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings  #-}
 -- | Add <http://content-security-policy.com/ CSP> headers to Yesod apps.
 -- This helps reduce the risk of exposure to XSS and bad assets.
 module Yesod.Csp (

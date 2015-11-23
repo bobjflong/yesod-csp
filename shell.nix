@@ -5,8 +5,8 @@ let
   inherit (nixpkgs) pkgs;
 
   f = { mkDerivation, attoparsec, base, hspec, mono-traversable
-      , network-uri, semigroups, stdenv, template-haskell, text, yesod
-      , yesod-core, yesod-test
+      , network-uri, semigroups, stdenv, template-haskell, text, uniplate
+      , yesod, yesod-core, yesod-test
       }:
       mkDerivation {
         pname = "yesod-csp";
@@ -14,7 +14,7 @@ let
         src = ./.;
         libraryHaskellDepends = [
           attoparsec base mono-traversable network-uri semigroups
-          template-haskell text yesod yesod-core
+          template-haskell text uniplate yesod yesod-core
         ];
         testHaskellDepends = [
           attoparsec base hspec network-uri semigroups template-haskell yesod

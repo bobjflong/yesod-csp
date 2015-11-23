@@ -5,10 +5,12 @@
 -- | Assorted examples demonstrating different policies.
 module Yesod.Csp.Example where
 
+import           Data.Generics.Uniplate.Data
 import           Data.List.NonEmpty
 import           Data.Maybe
-import           Yesod              hiding (get)
+import           Yesod                       hiding (get)
 import           Yesod.Csp
+import           Yesod.Csp.TH
 
 data Example = Example
 mkYesod "Example" [parseRoutes|
@@ -19,6 +21,7 @@ mkYesod "Example" [parseRoutes|
   /5 Example5R GET
   /6 Example6R GET
   /7 Example7R GET POST
+  /8 Example8R GET
 |]
 
 instance Yesod Example
@@ -93,6 +96,18 @@ postExample7R = do
   cspPolicy [Sandbox [AllowForms]]
   defaultLayout $
     [whamlet|yayyy|]
+
+cdn :: Source
+cdn = Host (fromJust $ escapeAndParseURI "https://cdn.com")
+
+getExample8R :: Handler Html
+getExample8R = do
+  let policy = [csp|script-src 'self'|]
+  cspPolicy $ addCdn <$> policy
+  defaultLayout [whamlet|wooo|]
+  where addCdn = transform f
+        f (ScriptSrc x) = ScriptSrc $ cdn <| x
+        f x = x
 
 -- | Run a webserver to serve these examples at /1, /2, etc.
 runExamples :: IO ()

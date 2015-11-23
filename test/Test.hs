@@ -70,6 +70,8 @@ main = hspec $ yesodSpec Test $ do
     yit "works with lists" $ do
       let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
       assertEqual "scripts and images" (parseOnly directive "img-src 'self' https:; script-src https://foo.com") (Right result)
+      let result = [ImgSrc $ Self :| [DataScheme, Host (fromJust $ escapeAndParseURI "https://foo.com")]]
+      assertEqual "data and hosts" (parseOnly directive "img-src 'self' data: https://foo.com") (Right result)
     yit "works with th" $ do
       let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
       assertEqual "with th" [csp|img-src 'self' https:; script-src https://foo.com|] result
