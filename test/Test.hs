@@ -74,6 +74,6 @@ main = hspec $ yesodSpec Test $ do
       assertEqual "data and hosts" (parseOnly directive "img-src 'self' data: https://foo.com") (Right result)
     yit "works with th" $ do
       let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
-      assertEqual "with th" [csp|img-src 'self' https:; script-src https://foo.com|] result
+      assertEqual "with th" [csp|img-src 'self' https:;  script-src https://foo.com|] result
       let url = fromJust $ escapeAndParseURI "https://foo.com"
       assertEqual "with antiquoting" [csp|img-src 'self' https:; script-src $url|] result

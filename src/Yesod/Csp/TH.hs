@@ -101,12 +101,15 @@ withSourceList = defaultSrc
         frameSrc = d "frame-src" FrameSrc
         d x y = string x >> s >> slist >>= mkWithSource y
         slist = sepBy1 source (char ' ')
-        s = string " "
+        s = spaces
+
+spaces :: Parser ()
+spaces = many space *> pure ()
 
 reportUri :: Parser Directive
 reportUri = do
   _ <- string "report-uri"
-  _ <- string " "
+  _ <- spaces
   u <- takeTill separated
   case escapeAndParseURI u of
     Nothing -> fail "reportUri" -- n.b. compile time error
@@ -115,8 +118,8 @@ reportUri = do
 sandbox :: Parser Directive
 sandbox = do
   _ <- string "sandbox"
-  _ <- string " "
-  x <- sepBy sandboxOptions (char ' ')
+  _ <- spaces
+  x <- sepBy sandboxOptions spaces
   return $ Sandbox x
 
 sandboxOptions :: Parser SandboxOptions
@@ -129,6 +132,10 @@ sandboxOptions = allowForms
         allowSameOrigin = string "allow-same-origin" *> pure AllowSameOrigin
         allowTopNavigation = string "allow-top-navigation" *> pure AllowTopNavigation
 
+separator :: Parser ()
+separator = comma *> (spaces *> pure ())
+  where comma = string ";"
+
 directive :: Parser DirectiveList
-directive = sepBy d (string "; ") <* endOfInput
+directive = sepBy d separator <* endOfInput
   where d = withSourceList <|> reportUri <|> sandbox
