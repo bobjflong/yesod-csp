@@ -12,7 +12,7 @@ module Yesod.Csp (
   , DirectiveList
   , Directive(..)
   , SourceList
-  , Source (..)
+  , Source(..)
   , SandboxOptions(..)
   , textSource
   ) where
