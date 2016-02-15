@@ -21,7 +21,6 @@ import           Data.Data          (Data)
 import           Data.List.NonEmpty
 import qualified Data.Sequences     as S
 import           Data.Text
-import qualified Data.Text          as T
 import           Data.Typeable      (Typeable)
 import           Network.URI
 import           Yesod.Core
@@ -56,16 +55,16 @@ instance Show EscapedText where
 toEscape :: String
 toEscape = ";'* "
 
+notEscapable :: Char -> Bool
+notEscapable = not . flip elem toEscape
+
 -- | Escapes ';' '\'' and ' ', and parses to URI
 escapeAndParseURI :: Text -> Maybe EscapedURI
-escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString f . unpack
-  where f :: Char -> Bool
-        f = not . flip elem toEscape
+escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString notEscapable . unpack
 
 -- | Escapes Text to be a valid nonce value
 escapedTextForNonce :: String -> EscapedText
-escapedTextForNonce = EscapedText . Prelude.filter kill
-  where kill c = not $ c `elem` toEscape
+escapedTextForNonce = EscapedText . Prelude.filter notEscapable
 
 -- | Escapes a Text value, returning a valid Nonce
 nonce :: Text -> Source
