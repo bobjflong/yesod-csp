@@ -45,10 +45,13 @@ getCspPolicy = directiveListToHeader
 
 newtype EscapedURI = EscapedURI { uri :: URI } deriving (Eq, Data, Typeable)
 
-newtype EscapedText = EscapedText { text :: String } deriving (Show, Eq, Data, Typeable)
+newtype EscapedText = EscapedText { text :: String } deriving (Eq, Data, Typeable)
 
 instance Show EscapedURI where
   show x = show (uri x)
+
+instance Show EscapedText where
+  show x = mconcat ["'nonce-", text x, "'"]
 
 toEscape :: String
 toEscape = ";'* "
@@ -112,7 +115,7 @@ textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 textSource (MetaSource _) = ""
-textSource (Nonce x) = pack $ mconcat ["'nonce-", text x, "'"]
+textSource (Nonce x) = (pack . show) x
 
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]
