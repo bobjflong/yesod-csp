@@ -23,6 +23,7 @@ module Yesod.Csp (
     , MetaSource
   )
   , SandboxOptions(..)
+  , textSource
   ) where
 
 import           Data.Data          (Data)

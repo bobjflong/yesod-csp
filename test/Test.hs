@@ -60,6 +60,7 @@ main = hspec $ yesodSpec Test $ do
   ydescribe "Parsing" $ do
     yit "works" $ do
       assertEqual "*" (parseOnly source "*") (Right Wildcard)
+      assertEqual "nonce" (fmap textSource $ parseOnly source "'nonce-foo'") (Right "'nonce-foo'")
       assertEqual "none" (parseOnly source "'none'") (Right None)
       assertEqual "self" (parseOnly source "'self'") (Right Self)
       assertEqual "data:" (parseOnly source "data:") (Right DataScheme)
