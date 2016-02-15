@@ -60,7 +60,7 @@ main = hspec $ yesodSpec Test $ do
   ydescribe "Parsing" $ do
     yit "works" $ do
       assertEqual "*" (parseOnly source "*") (Right Wildcard)
-      assertEqual "nonce" (fmap textSource $ parseOnly source "'nonce-foo'") (Right "'nonce-foo'")
+      assertEqual "nonce" (parseOnly source "'nonce-foo'") (Right $ nonce "foo")
       assertEqual "none" (parseOnly source "'none'") (Right None)
       assertEqual "self" (parseOnly source "'self'") (Right Self)
       assertEqual "data:" (parseOnly source "data:") (Right DataScheme)
@@ -76,6 +76,13 @@ main = hspec $ yesodSpec Test $ do
       assertEqual "scripts and images" (parseOnly directive "img-src 'self' https:; script-src https://foo.com") (Right result)
       let result = [ImgSrc $ Self :| [DataScheme, Host (fromJust $ escapeAndParseURI "https://foo.com")]]
       assertEqual "data and hosts" (parseOnly directive "img-src 'self' data: https://foo.com") (Right result)
+    yit "works with nonces and th" $ do
+      let result = [ScriptSrc $ (nonce "foo") :| []]
+      assertEqual "nonces and th" [csp|script-src 'nonce-foo'|] result
+    yit "works with dynamic nonces and th" $ do
+      let n = "bar"
+          result = [ScriptSrc $ (nonce "bar") :| []]
+      assertEqual "dynamic nonces and th" [csp|script-src $nonce-n|] result
     yit "works with th" $ do
       let result = [ImgSrc $ Self :| [Https], ScriptSrc $ Host (fromJust $ escapeAndParseURI "https://foo.com") :| []]
       assertEqual "with th" [csp|img-src 'self' https:;  script-src https://foo.com|] result

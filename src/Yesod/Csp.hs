@@ -7,21 +7,12 @@ module Yesod.Csp (
   , getCspPolicy
   , EscapedURI
   , escapeAndParseURI
+  , escapedTextForNonce
   , nonce
   , DirectiveList
   , Directive(..)
   , SourceList
-  , Source (
-    Wildcard
-    , None
-    , Self
-    , DataScheme
-    , Host
-    , Https
-    , UnsafeInline
-    , UnsafeEval
-    , MetaSource
-  )
+  , Source (..)
   , SandboxOptions(..)
   , textSource
   ) where
@@ -54,7 +45,7 @@ getCspPolicy = directiveListToHeader
 
 newtype EscapedURI = EscapedURI { uri :: URI } deriving (Eq, Data, Typeable)
 
-newtype EscapedText = EscapedText { text :: Text } deriving (Show, Eq, Data, Typeable)
+newtype EscapedText = EscapedText { text :: String } deriving (Show, Eq, Data, Typeable)
 
 instance Show EscapedURI where
   show x = show (uri x)
@@ -68,10 +59,14 @@ escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString f . unpack
   where f :: Char -> Bool
         f = not . flip elem toEscape
 
--- | Escapes a text value, returning a valid Nonce
-nonce :: Text -> Source
-nonce = Nonce . EscapedText . T.filter kill
+-- | Escapes Text to be a valid nonce value
+escapedTextForNonce :: String -> EscapedText
+escapedTextForNonce = EscapedText . Prelude.filter kill
   where kill c = not $ c `elem` toEscape
+
+-- | Escapes a Text value, returning a valid Nonce
+nonce :: Text -> Source
+nonce = Nonce . escapedTextForNonce . unpack
 
 directiveListToHeader :: DirectiveList -> Text
 directiveListToHeader = S.intercalate "; " . fmap textDirective
@@ -117,7 +112,7 @@ textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 textSource (MetaSource _) = ""
-textSource (Nonce x) = mconcat ["'nonce-", text x, "'"]
+textSource (Nonce x) = pack $ mconcat ["'nonce-", text x, "'"]
 
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]
