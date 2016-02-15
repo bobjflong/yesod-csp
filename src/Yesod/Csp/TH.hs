@@ -50,11 +50,19 @@ source = wildcard
          <|> host
          <|> unsafeInline
          <|> unsafeEval
+         <|> parseNonce
          <|> metaSource
   where wildcard = string "*" *> pure Wildcard
         none = string "'none'" *> pure None
         self = string "'self'" *> pure Self
         dataScheme = string "data:" *> pure DataScheme
+        parseNonce :: Parser Source
+        parseNonce = do
+          _ <- char '\''
+          _ <- string "nonce"
+          _ <- char '-'
+          n <- takeTill (== '\'')
+          return $ nonce n
         host :: Parser Source
         host = do
           u <- takeTill separated

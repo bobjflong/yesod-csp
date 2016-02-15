@@ -33,6 +33,9 @@ main = hspec $ yesodSpec Test $ do
       let dom = fromJust $ escapeAndParseURI "https://foo.com/bar *"
           header = getCspPolicy [ScriptSrc (Host dom :| [])]
       assertEqual "foo.com script-src" header "script-src https://foo.com/bar%20%2A"
+    yit "works with nonce-source" $ do
+      let header = getCspPolicy [ScriptSrc (nonce "foo" :| [])]
+      assertEqual "basic nonce-source" header "script-src 'nonce-foo'"
     yit "works with report_uri" $ do
       let dom = fromJust $ escapeAndParseURI "https://foo.com"
           header = getCspPolicy [ReportUri dom]
@@ -57,6 +60,7 @@ main = hspec $ yesodSpec Test $ do
   ydescribe "Parsing" $ do
     yit "works" $ do
       assertEqual "*" (parseOnly source "*") (Right Wildcard)
+      assertEqual "nonce" (fmap textSource $ parseOnly source "'nonce-foo'") (Right "'nonce-foo'")
       assertEqual "none" (parseOnly source "'none'") (Right None)
       assertEqual "self" (parseOnly source "'self'") (Right Self)
       assertEqual "data:" (parseOnly source "data:") (Right DataScheme)

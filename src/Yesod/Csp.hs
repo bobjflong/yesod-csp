@@ -7,17 +7,30 @@ module Yesod.Csp (
   , getCspPolicy
   , EscapedURI
   , escapeAndParseURI
+  , nonce
   , DirectiveList
   , Directive(..)
   , SourceList
-  , Source(..)
+  , Source (
+    Wildcard
+    , None
+    , Self
+    , DataScheme
+    , Host
+    , Https
+    , UnsafeInline
+    , UnsafeEval
+    , MetaSource
+  )
   , SandboxOptions(..)
+  , textSource
   ) where
 
 import           Data.Data          (Data)
 import           Data.List.NonEmpty
 import qualified Data.Sequences     as S
 import           Data.Text
+import qualified Data.Text          as T
 import           Data.Typeable      (Typeable)
 import           Network.URI
 import           Yesod.Core
@@ -41,16 +54,24 @@ getCspPolicy = directiveListToHeader
 
 newtype EscapedURI = EscapedURI { uri :: URI } deriving (Eq, Data, Typeable)
 
+newtype EscapedText = EscapedText { text :: Text } deriving (Show, Eq, Data, Typeable)
+
 instance Show EscapedURI where
   show x = show (uri x)
+
+toEscape :: String
+toEscape = ";'* "
 
 -- | Escapes ';' '\'' and ' ', and parses to URI
 escapeAndParseURI :: Text -> Maybe EscapedURI
 escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString f . unpack
   where f :: Char -> Bool
         f = not . flip elem toEscape
-        toEscape :: String
-        toEscape = ";'* "
+
+-- | Escapes a text value, returning a valid Nonce
+nonce :: Text -> Source
+nonce = Nonce . EscapedText . T.filter kill
+  where kill c = not $ c `elem` toEscape
 
 directiveListToHeader :: DirectiveList -> Text
 directiveListToHeader = S.intercalate "; " . fmap textDirective
@@ -80,6 +101,7 @@ data Source = Wildcard
               | Https
               | UnsafeInline
               | UnsafeEval
+              | Nonce EscapedText
               | MetaSource Text deriving (Eq, Show, Data, Typeable)
 
 -- | A list of allowed sources for a directive.
@@ -95,6 +117,7 @@ textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 textSource (MetaSource _) = ""
+textSource (Nonce x) = mconcat ["'nonce-", text x, "'"]
 
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]
