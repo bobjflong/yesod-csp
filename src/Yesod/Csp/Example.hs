@@ -24,6 +24,7 @@ mkYesod "Example" [parseRoutes|
   /8 Example8R GET
   /9 Example9R GET
   /10 Example10R GET
+  /11 Example11R GET
 |]
 
 instance Yesod Example
@@ -127,7 +128,16 @@ getExample10R = do
     <script nonce="foo">
       alert("ayyyy");
   |]
-  
+
+getExample11R :: Handler Html
+getExample11R = do
+  let n = "bar"
+  cspPolicy [csp|script-src $nonce-n|]
+  defaultLayout $ [whamlet|
+    <script nonce="foo">
+      alert("ayyyy");
+  |]
+
 -- | Run a webserver to serve these examples at /1, /2, etc.
 runExamples :: IO ()
 runExamples = warp 4567 Example
