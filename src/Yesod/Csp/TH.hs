@@ -32,9 +32,9 @@ csp = QuasiQuoter {
     }
 
 antiCsp :: Source -> Maybe (TH.Q TH.Exp)
-antiCsp (MetaSource x) = case T.isPrefixOf noncePrefix x of
-  False -> Just . return $ TH.AppE (TH.ConE (TH.mkName "Host")) (TH.VarE (TH.mkName (T.unpack x)))
-  True -> Just . return $ TH.AppE (TH.VarE (TH.mkName "nonce")) (TH.VarE (TH.mkName (T.unpack (nonceVar x))))
+antiCsp (MetaSource x) = if T.isPrefixOf noncePrefix x
+  then Just . return $ TH.AppE (TH.VarE (TH.mkName "nonce")) (TH.VarE (TH.mkName (T.unpack (nonceVar x))))
+  else Just . return $ TH.AppE (TH.ConE (TH.mkName "Host")) (TH.VarE (TH.mkName (T.unpack x)))
   where noncePrefix = "nonce-"
         nonceVar = T.drop (T.length noncePrefix)
 antiCsp _ = Nothing
@@ -42,7 +42,7 @@ antiCsp _ = Nothing
 metaSource :: Parser Source
 metaSource = do
   _ <- char '$'
-  x <- many (digit <|> letter <|> (char '-'))
+  x <- many (digit <|> letter <|> char '-')
   return $ MetaSource (T.pack x)
 
 source :: Parser Source

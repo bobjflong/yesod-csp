@@ -19,8 +19,8 @@ module Yesod.Csp (
 
 import           Data.Data          (Data)
 import           Data.List.NonEmpty
-import qualified Data.Sequences     as S
 import           Data.Text
+import qualified Data.Text          as T
 import           Data.Typeable      (Typeable)
 import           Network.URI
 import           Yesod.Core
@@ -71,7 +71,7 @@ nonce :: Text -> Source
 nonce = Nonce . escapedTextForNonce . unpack
 
 directiveListToHeader :: DirectiveList -> Text
-directiveListToHeader = S.intercalate "; " . fmap textDirective
+directiveListToHeader = intercalate "; " . fmap textDirective
 
 w :: Text -> SourceList -> Text
 w = wrap
@@ -80,7 +80,7 @@ wrap :: Text -> SourceList -> Text
 wrap k x = mconcat [k, " ", textSourceList x]
 
 textSourceList :: SourceList -> Text
-textSourceList = S.unwords . toList . filtered
+textSourceList = T.unwords . toList . filtered
   where filtered = fmap textSource . filterOut
 
 -- * and none should be alone if present
@@ -152,7 +152,7 @@ textDirective (MediaSrc x) =  w "media-src" x
 textDirective (FrameSrc x) =  w "frame-src" x
 textDirective (ReportUri t) = mconcat ["report-uri ", (pack . show) t]
 textDirective (Sandbox []) = "sandbox"
-textDirective (Sandbox s) = mconcat ["sandbox ", S.unwords . fmap textSandbox $ s]
+textDirective (Sandbox s) = mconcat ["sandbox ", T.unwords . fmap textSandbox $ s]
   where textSandbox AllowForms = "allow-forms"
         textSandbox AllowScripts = "allow-scripts"
         textSandbox AllowSameOrigin = "allow-same-origin"
