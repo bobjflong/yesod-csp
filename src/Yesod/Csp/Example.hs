@@ -23,6 +23,7 @@ mkYesod "Example" [parseRoutes|
   /8 Example8R GET
   /9 Example9R GET
   /10 Example10R GET
+  /11 Example11R GET
 |]
 
 instance Yesod Example
@@ -127,6 +128,16 @@ getExample10R = do
     <script nonce="foo">
       alert("ayyyy");
   |]
+
+getExample11R :: Handler Html
+getExample11R = do
+  let google = fromJust (escapeAndParseURI "https://google.ie")
+  cspPolicy [FrameAncestors (Host google :| [])]
+  defaultLayout $
+    [whamlet|
+      I should only be iframe-able by Google!
+    |]
+
 
 -- | Run a webserver to serve these examples at /1, /2, etc.
 runExamples :: IO ()

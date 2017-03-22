@@ -130,6 +130,7 @@ data Directive = DefaultSrc SourceList
                  | ObjectSrc SourceList
                  | MediaSrc SourceList
                  | FrameSrc SourceList
+                 | FrameAncestors SourceList
                  -- | Applies a sandbox to the result. <http://content-security-policy.com/ See here> for more info.
                  | Sandbox [SandboxOptions]
                  | ReportUri EscapedURI deriving (Eq, Show, Data, Typeable)
@@ -150,6 +151,7 @@ textDirective (FontSrc x) =  w "font-src" x
 textDirective (ObjectSrc x) =  w "object-src" x
 textDirective (MediaSrc x) =  w "media-src" x
 textDirective (FrameSrc x) =  w "frame-src" x
+textDirective (FrameAncestors x) =  w "frame-ancestors" x
 textDirective (ReportUri t) = mconcat ["report-uri ", (pack . show) t]
 textDirective (Sandbox []) = "sandbox"
 textDirective (Sandbox s) = mconcat ["sandbox ", T.unwords . fmap textSandbox $ s]

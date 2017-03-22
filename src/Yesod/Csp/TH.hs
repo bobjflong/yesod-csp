@@ -103,6 +103,7 @@ withSourceList = defaultSrc
                  <|> objectSrc
                  <|> mediaSrc
                  <|> frameSrc
+                 <|> frameAncestors
   where defaultSrc = d "default-src" DefaultSrc
         scriptSrc = d "script-src" ScriptSrc
         styleSrc = d "style-src" StyleSrc
@@ -112,6 +113,7 @@ withSourceList = defaultSrc
         objectSrc = d "object-src" ObjectSrc
         mediaSrc = d "media-src" MediaSrc
         frameSrc = d "frame-src" FrameSrc
+        frameAncestors = d "frame-ancestors" FrameAncestors
         d x y = string x >> s >> slist >>= mkWithSource y
         slist = sepBy1 source (char ' ')
         s = spaces
