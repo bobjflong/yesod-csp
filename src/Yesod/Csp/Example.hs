@@ -5,7 +5,6 @@
 -- | Assorted examples demonstrating different policies.
 module Yesod.Csp.Example where
 
-import           Data.Generics.Uniplate.Data
 import           Data.List.NonEmpty
 import           Data.Maybe
 import           Yesod                       hiding (get)
@@ -24,7 +23,6 @@ mkYesod "Example" [parseRoutes|
   /8 Example8R GET
   /9 Example9R GET
   /10 Example10R GET
-  /11 Example11R GET
 |]
 
 instance Yesod Example
@@ -103,25 +101,17 @@ postExample7R = do
 cdn :: Source
 cdn = Host (fromJust $ escapeAndParseURI "https://cdn.com")
 
+
 getExample8R :: Handler Html
 getExample8R = do
-  let policy = [csp|script-src 'self'|]
-  cspPolicy $ addCdn <$> policy
-  defaultLayout [whamlet|wooo|]
-  where addCdn = transform f
-        f (ScriptSrc x) = ScriptSrc $ cdn <| x
-        f x = x
-
-getExample9R :: Handler Html
-getExample9R = do
   cspPolicy [csp|script-src 'nonce-foo'|]
   defaultLayout $ [whamlet|
     <script nonce="foo">
       alert("ayyyy");
   |]
 
-getExample10R :: Handler Html
-getExample10R = do
+getExample9R :: Handler Html
+getExample9R = do
   let n = "foo"
   cspPolicy [csp|script-src $nonce-n|]
   defaultLayout $ [whamlet|
@@ -129,8 +119,8 @@ getExample10R = do
       alert("ayyyy");
   |]
 
-getExample11R :: Handler Html
-getExample11R = do
+getExample10R :: Handler Html
+getExample10R = do
   let n = "bar"
   cspPolicy [csp|script-src $nonce-n|]
   defaultLayout $ [whamlet|
