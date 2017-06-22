@@ -5,6 +5,7 @@
 module Yesod.Csp (
   cspPolicy
   , getCspPolicy
+  , cspMiddleware
   , EscapedURI
   , escapeAndParseURI
   , escapedTextForNonce
@@ -17,13 +18,17 @@ module Yesod.Csp (
   , textSource
   ) where
 
+import qualified Data.CaseInsensitive as CI
 import           Data.Data          (Data)
 import           Data.List.NonEmpty
 import           Data.Text
 import qualified Data.Text          as T
+import qualified Data.Text.Encoding as TE
 import           Data.Typeable      (Typeable)
 import           Network.URI
 import           Yesod.Core
+import           Network.Wai        (Middleware, mapResponseHeaders,
+                                     modifyResponse)
 
 -- | Adds a "Content-Security-Policy" header to your response.
 --
@@ -36,11 +41,28 @@ import           Yesod.Core
 -- >     [whamlet|hello|]
 --
 cspPolicy :: (MonadHandler m) => DirectiveList -> m ()
-cspPolicy = addHeader "Content-Security-Policy" . directiveListToHeader
+cspPolicy = addHeader cspHeaderName . directiveListToHeader
+
+cspHeaderName :: Text
+cspHeaderName = "Content-Security-Policy"
 
 -- | Returns a generated Content-Security-Policy header.
 getCspPolicy :: DirectiveList -> Text
 getCspPolicy = directiveListToHeader
+
+-- | Creates a WAI 'Middleware' to add a Content-Security-Policy
+-- header to every response.
+cspMiddleware :: DirectiveList -> Middleware
+cspMiddleware = addHeaderMiddleware . mkHeader . directiveListToHeader
+  where
+    addHeaderMiddleware = modifyResponse . mapResponseHeaders . insertAt 5
+    mkHeader dltext = (cspHeaderNameBS, TE.encodeUtf8 dltext)
+    cspHeaderNameBS = CI.mk $ TE.encodeUtf8 cspHeaderName
+
+insertAt :: Int -> a -> [a] -> [a]
+insertAt n x xs =
+  let (h, t) = Prelude.splitAt n xs
+  in h ++ x : t
 
 newtype EscapedURI = EscapedURI { uri :: URI } deriving (Eq, Data, Typeable)
 

@@ -5,6 +5,7 @@
 {-# LANGUAGE TypeFamilies          #-}
 
 import           Data.Attoparsec.Text
+import           Data.Functor         ((<$>))
 import           Data.List.NonEmpty
 import           Data.Maybe
 import           Test.Hspec
@@ -14,7 +15,10 @@ import           Yesod.Csp.TH
 import           Yesod.Test
 
 data Test = Test
-mkYesod "Test" [parseRoutes| / HomeR GET |]
+mkYesod "Test" [parseRoutes|
+/ HomeR GET
+/nocsp NoCspR GET
+|]
 
 instance Yesod Test
 
@@ -23,8 +27,15 @@ getHomeR = do
   cspPolicy [ScriptSrc (Self :| []), StyleSrc (Https :| [Self])]
   defaultLayout [whamlet|hello|]
 
+getNoCspR :: Handler Html
+getNoCspR = do
+  defaultLayout [whamlet|hello|]
+
 main :: IO ()
-main = hspec $ yesodSpec Test $ do
+main = hspec $ tests >> middlewareTest
+
+tests :: Spec
+tests = yesodSpec Test $ do
   ydescribe "Generation" $ do
     yit "works" $ do
       let header = getCspPolicy [ScriptSrc (Self :| []), StyleSrc (Https :| [Self])]
@@ -88,3 +99,13 @@ main = hspec $ yesodSpec Test $ do
       assertEq "with th" [csp|img-src 'self' https:;  script-src https://foo.com|] result
       let url = fromJust $ escapeAndParseURI "https://foo.com"
       assertEq "with antiquoting" [csp|img-src 'self' https:; script-src $url|] result
+
+middlewareTest :: Spec
+middlewareTest = yesodSpecApp Test getApp $ do
+  ydescribe "Middleware" $ do
+    yit "works" $ do
+      get NoCspR
+      assertHeader "Content-Security-Policy" "frame-ancestors 'self'"
+  where
+    getApp = cspMiddleware [FrameAncestors (Self :| [])] <$>
+             toWaiAppPlain Test
