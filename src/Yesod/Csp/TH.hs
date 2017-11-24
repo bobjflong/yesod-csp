@@ -54,6 +54,7 @@ source = wildcard
          <|> host
          <|> unsafeInline
          <|> unsafeEval
+         <|> strictDynamic
          <|> parseNonce
          <|> metaSource
   where wildcard = string "*" *> pure Wildcard
@@ -84,6 +85,7 @@ source = wildcard
             _ -> fail "https"
         unsafeInline = string "unsafe-inline" *> pure UnsafeInline
         unsafeEval = string "unsafe-eval" *> pure UnsafeEval
+        strictDynamic = string "strict-dynamic" *> pure StrictDynamic
 
 separated :: Char -> Bool
 separated x = x == ';' || x == ' '

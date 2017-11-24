@@ -24,6 +24,7 @@ mkYesod "Example" [parseRoutes|
   /9 Example9R GET
   /10 Example10R GET
   /11 Example11R GET
+  /12 Example12R GET
 |]
 
 instance Yesod Example
@@ -138,6 +139,14 @@ getExample11R = do
       I should only be iframe-able by Google!
     |]
 
+getExample12R :: Handler Html
+getExample12R = do
+  let n = "foo"
+  cspPolicy [csp|script-src strict-dynamic unsafe-inline $nonce-n|]
+  defaultLayout $ [whamlet|
+    <script nonce="foo">
+      alert("ayyyy");
+  |]
 
 -- | Run a webserver to serve these examples at /1, /2, etc.
 runExamples :: IO ()

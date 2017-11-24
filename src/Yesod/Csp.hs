@@ -120,6 +120,7 @@ data Source = Wildcard
               | Https
               | UnsafeInline
               | UnsafeEval
+              | StrictDynamic
               | Nonce EscapedText
               | MetaSource Text deriving (Eq, Show, Data, Typeable)
 
@@ -135,6 +136,7 @@ textSource (Host x) = (pack . show) x
 textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
+textSource StrictDynamic = "'strict-dynamic'"
 textSource (MetaSource _) = ""
 textSource (Nonce x) = (pack . show) x
 
