@@ -154,5 +154,5 @@ separator = comma *> (spaces *> pure ())
   where comma = string ";"
 
 directive :: Parser DirectiveList
-directive = sepBy d separator <* endOfInput
+directive = sepBy (spaces *> d) separator <* (spaces *> endOfInput)
   where d = withSourceList <|> reportUri <|> sandbox
