@@ -99,6 +99,11 @@ tests = yesodSpec Test $ do
       assertEq "with th" [csp|img-src 'self' https:;  script-src https://foo.com|] result
       let url = fromJust $ escapeAndParseURI "https://foo.com"
       assertEq "with antiquoting" [csp|img-src 'self' https:; script-src $url|] result
+    yit "works with th and newlines" $ do
+      let attempt = [csp|
+        default-src 'self'
+      |]
+      assertEq "with th and newlines" attempt [DefaultSrc (Self :| [])]
 
 middlewareTest :: Spec
 middlewareTest = yesodSpecApp Test getApp $ do
