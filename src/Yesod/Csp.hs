@@ -21,7 +21,7 @@ module Yesod.Csp (
 import qualified Data.CaseInsensitive as CI
 import           Data.Data          (Data)
 import           Data.List.NonEmpty
-import           Data.Text
+import           Data.Text          (Text)
 import qualified Data.Text          as T
 import qualified Data.Text.Encoding as TE
 import           Data.Typeable      (Typeable)
@@ -82,7 +82,7 @@ notEscapable = not . flip elem toEscape
 
 -- | Escapes ';' '\'' and ' ', and parses to URI
 escapeAndParseURI :: Text -> Maybe EscapedURI
-escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString notEscapable . unpack
+escapeAndParseURI = fmap EscapedURI . parseURI . escapeURIString notEscapable . T.unpack
 
 -- | Escapes Text to be a valid nonce value
 escapedTextForNonce :: String -> EscapedText
@@ -90,10 +90,10 @@ escapedTextForNonce = EscapedText . Prelude.filter notEscapable
 
 -- | Escapes a Text value, returning a valid Nonce
 nonce :: Text -> Source
-nonce = Nonce . escapedTextForNonce . unpack
+nonce = Nonce . escapedTextForNonce . T.unpack
 
 directiveListToHeader :: DirectiveList -> Text
-directiveListToHeader = intercalate "; " . fmap textDirective
+directiveListToHeader = T.intercalate "; " . fmap textDirective
 
 w :: Text -> SourceList -> Text
 w = wrap
@@ -132,13 +132,13 @@ textSource Wildcard = "*"
 textSource None = "'none'"
 textSource Self = "'self'"
 textSource DataScheme = "data:"
-textSource (Host x) = (pack . show) x
+textSource (Host x) = (T.pack . show) x
 textSource Https = "https:"
 textSource UnsafeInline = "'unsafe-inline'"
 textSource UnsafeEval = "'unsafe-eval'"
 textSource StrictDynamic = "'strict-dynamic'"
 textSource (MetaSource _) = ""
-textSource (Nonce x) = (pack . show) x
+textSource (Nonce x) = (T.pack . show) x
 
 -- | A list of restrictions to apply.
 type DirectiveList = [Directive]
@@ -176,7 +176,7 @@ textDirective (ObjectSrc x) =  w "object-src" x
 textDirective (MediaSrc x) =  w "media-src" x
 textDirective (FrameSrc x) =  w "frame-src" x
 textDirective (FrameAncestors x) =  w "frame-ancestors" x
-textDirective (ReportUri t) = mconcat ["report-uri ", (pack . show) t]
+textDirective (ReportUri t) = mconcat ["report-uri ", (T.pack . show) t]
 textDirective (Sandbox []) = "sandbox"
 textDirective (Sandbox s) = mconcat ["sandbox ", T.unwords . fmap textSandbox $ s]
   where textSandbox AllowForms = "allow-forms"
