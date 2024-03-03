@@ -1,3 +1,5 @@
+# PACKAGE MOVED TO https://github.com/pSub/yesod-csp
+
 #### yesod-csp
 
 The aim of this library is to make it easy to add correct [Content Security Policy](http://content-security-policy.com/) headers to your responses. This reduces the risk of loading bad assets or scripts.
